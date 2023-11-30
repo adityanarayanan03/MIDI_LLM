@@ -1,3 +1,7 @@
 test_scripts/api_config.yaml
 api_config.yaml
+config.yaml
 __pycache__
+bach/
+.DS_Store
+bach.zip
