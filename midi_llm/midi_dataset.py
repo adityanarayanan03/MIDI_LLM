@@ -9,7 +9,13 @@ logger = logging.getLogger("midi_dataset")
 logger.setLevel(logging.DEBUG)
 
 class MIDI_Dataset:
-    def __init__(self, parent_dir):
+    def __init__(self, parent_dir, verbose=0):
+        if verbose == 0:
+            logger.setLevel(logging.WARNING)
+        elif verbose == 1:
+            logger.setLeve(logging.INFO)
+        else:
+            logger.setLevel(logging.DEBUG)
 
         #Find all midi files within the parent directory
         self.files = []
@@ -19,6 +25,21 @@ class MIDI_Dataset:
                 self.files.append(os.path.join(root, filename))
         
         self.tracks = self._tokenize_files()
+        self._apply_token_mapping()
+    
+    def _apply_token_mapping(self):
+        '''
+        Applies a mapping onto self.tracks. This is only necessary becuase
+        using the default token values results in some unknown characters when
+        converted to pseudo-english using llama's *de*tokenizer.
+
+        Because we're really trying to demonstrate in-context learning here,
+        this mapping can be COMPLETELY arbitrary, as long as it avoids 
+        unset token numbers in llama's token set
+        '''
+        logger.debug("Applying token mapping")
+        for idx in range(len(self.tracks)):
+            self.tracks[idx] = [x + 10000 for x in self.tracks[idx]]
     
     def _tokenize_files(self):
         '''
@@ -40,7 +61,7 @@ class MIDI_Dataset:
                 midi = MidiFile(file)
 
             except:
-                logger.warning(f"Coulding tokenize file {file}")
+                logger.warning(f"Couldnt tokenize file {file}")
                 continue
 
             this_file_tracks = tokenizer(midi)
