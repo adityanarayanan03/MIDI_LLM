@@ -5,3 +5,4 @@ __pycache__
 bach/
 .DS_Store
 bach.zip
+midi_llm.egg-info

@@ -1,0 +1,31 @@
+[build-system]
+requires = ["setuptools"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools.packages]
+find = {}  # Scanning implicit namespaces is active by default
+
+[project]
+name = "midi_llm"
+version = "0.0.1"
+authors = [
+  { name="Aditya Narayanan", email="adityan@utexas.edu" },
+]
+description = "Music predicion on midi files using LLM in-context learning"
+readme = "README.md"
+requires-python = ">=3.8"
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: Linux",
+]
+dependencies = [
+    "miditok",
+    "huggingface-hub",
+    "transformers",
+    "omegaconf"
+]
+
+[project.urls]
+"Homepage" = "https://github.com/adityanarayanan03/MIDI_LLM"
+"Bug Tracker" = "https://github.com/adityanarayanan03/MIDI_LLM/issues"
