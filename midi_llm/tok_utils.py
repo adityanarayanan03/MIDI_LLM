@@ -34,4 +34,4 @@ if __name__ == "__main__":
     llama_tok = Llama_Tokenizer("config.yaml")
     x = llama_tok.tokenize('This is a sentence')
     logger.debug(f"Tokenized version of \"This is a sentence\": {x}")
-    logger.debug(f"Detokenized version of that: {llama_tok.detokenize(x["input_ids"])}")
+    # logger.debug(f"Detokenized version of that: {llama_tok.detokenize(x["input_ids"])}")

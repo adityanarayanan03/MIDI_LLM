@@ -18,7 +18,7 @@ logger.setLevel(logging.DEBUG)
 CONTEXT_LEN = 100
 
 #instantiate our wrappers around various dataset and huggingface functions
-midi_dataset = MIDI_Dataset("bach/cellosui")
+midi_dataset = MIDI_Dataset("MIDI_LLM/OriginalMidiFiles/bach/cellosui", tokenization_method='TSD')
 llama = LLM("config.yaml")
 llama_tok = Llama_Tokenizer("config.yaml")
 
