@@ -23,7 +23,8 @@ dependencies = [
     "miditok",
     "huggingface-hub",
     "transformers",
-    "omegaconf"
+    "omegaconf",
+    "pygame"
 ]
 
 [project.urls]
