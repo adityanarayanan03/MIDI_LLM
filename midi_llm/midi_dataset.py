@@ -1,6 +1,6 @@
 import os
 import fnmatch
-from miditok import Structured, TokenizerConfig
+from miditok import Structured, TSD, MIDILike, TokenizerConfig
 from miditoolkit import MidiFile
 
 import logging
@@ -9,7 +9,7 @@ logger = logging.getLogger("midi_dataset")
 logger.setLevel(logging.DEBUG)
 
 class MIDI_Dataset:
-    def __init__(self, parent_dir, verbose=0):
+    def __init__(self, parent_dir, tokenization_method, verbose=0):
         if verbose == 0:
             logger.setLevel(logging.WARNING)
         elif verbose == 1:
@@ -23,7 +23,9 @@ class MIDI_Dataset:
         for root, dirs, files in os.walk(parent_dir):
             for filename in fnmatch.filter(files, pattern):
                 self.files.append(os.path.join(root, filename))
-        
+
+        self.tokenization_method = tokenization_method
+
         self.tracks = self._tokenize_files()
         self._apply_token_mapping()
     
@@ -52,7 +54,15 @@ class MIDI_Dataset:
         tracks = []
 
         config = TokenizerConfig()
-        tokenizer = Structured(config)
+
+        # Defining tokenizer dictionary for selection
+        tokenizer_dict = {
+            'Structured': Structured(config),
+            'TSD': TSD(config),
+            'MIDILike': MIDILike(config)
+        }
+
+        tokenizer = tokenizer_dict.get(self.tokenization_method)
 
         for file in self.files:
             logger.debug(f"Attempting to tokenize file {file}")
