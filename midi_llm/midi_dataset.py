@@ -22,12 +22,16 @@ class MIDI_Dataset:
 
         # Find all midi files within the parent directory
         self.files = []
+        # self.file_names = []
         pattern = "*.mid"
         for root, dirs, files in os.walk(parent_dir):
             for filename in fnmatch.filter(files, pattern):
                 self.files.append(os.path.join(root, filename))
+                # Test this
+                # self.file_names.append(os.path.splitext(os.path.basename(root))[0])
 
         self.tokenization_method = tokenization_method
+        self.max_tokens = 0
 
         self.generated_track_tokens = []
         self.generated_midi_files = []
@@ -57,7 +61,7 @@ class MIDI_Dataset:
         logger.debug("Reversing token mapping")
         for idx in range(len(self.generated_track_tokens)):
             for index, x in enumerate(self.generated_track_tokens[idx]):
-                if x < 10000 or x - 10000 > 1500:
+                if x < 10000 or x - 10000 > self.max_tokens:
                     self.generated_track_tokens[idx][index] = 0
                 else:
                     self.generated_track_tokens[idx][index] = x - 10000
@@ -84,6 +88,7 @@ class MIDI_Dataset:
         }
 
         self.tokenizer = tokenizer_dict.get(self.tokenization_method)
+        self.max_tokens = len(self.tokenizer)
 
         for file in self.files:
             logger.debug(f"Attempting to tokenize file {file}")
