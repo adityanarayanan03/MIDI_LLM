@@ -2,6 +2,7 @@ import os
 import fnmatch
 from miditok import Structured, TSD, MIDILike, TokenizerConfig
 from miditoolkit import MidiFile
+from miditok.classes import TokSequence
 
 import logging
 logging.basicConfig()
@@ -13,7 +14,7 @@ class MIDI_Dataset:
         if verbose == 0:
             logger.setLevel(logging.WARNING)
         elif verbose == 1:
-            logger.setLeve(logging.INFO)
+            logger.setLevel(logging.INFO)
         else:
             logger.setLevel(logging.DEBUG)
 
@@ -62,7 +63,7 @@ class MIDI_Dataset:
             'MIDILike': MIDILike(config)
         }
 
-        tokenizer = tokenizer_dict.get(self.tokenization_method)
+        self.tokenizer = tokenizer_dict.get(self.tokenization_method)
 
         for file in self.files:
             logger.debug(f"Attempting to tokenize file {file}")
@@ -74,12 +75,35 @@ class MIDI_Dataset:
                 logger.warning(f"Couldnt tokenize file {file}")
                 continue
 
-            this_file_tracks = tokenizer(midi)
+            this_file_tracks = self.tokenizer(midi)
 
             tracks += [x.ids for x in this_file_tracks]
         
         return tracks
     
+    def write_midi_from_tokens(self, token_ids: list, filename: str):
+        '''
+        Writes input tokens into a midi file using the tokenizer
+        MIDIDataset was instantated with.
+
+        This is equivalent to detokenizing the input stream
+
+        Returns the midi object and writes it to the input filename.
+        '''
+        ts = TokSequence()
+        ts.ids = token_ids
+
+        self.tokenizer.complete_sequence(ts)
+
+        midi_out = self.tokenizer([ts])
+
+        if ".mid" not in filename:
+            filename += ".mid"
+
+        midi_out.dump(filename)
+
+        return midi_out
+
     def __getitem__(self, index):
         return self.tracks[index]
     
