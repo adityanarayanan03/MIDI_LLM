@@ -1,6 +1,6 @@
 '''
-Download piano solos off of a webpage
-recommended init params:
+Download midi instrument solos off of a webpage
+recommended/verified init params:
     website_url = "https://www.mfiles.co.uk/midi-original.htm"
     output_folder = "piano_midis"
     keyword = "piano"
