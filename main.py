@@ -15,12 +15,15 @@ logger = logging.getLogger("MAIN")
 logger.setLevel(logging.DEBUG)
 
 #Setup parameters
-CONTEXT_LEN = 100
+CONTEXT_LEN = 200
+
+tokenization_methods = ['Structured', 'TSD', 'MIDILike']
 
 #instantiate our wrappers around various dataset and huggingface functions
-midi_dataset = MIDI_Dataset("bach/cellosui/", tokenization_method='MIDILike')
-llama = LLM("config.yaml")
-llama_tok = Llama_Tokenizer("config.yaml")
+llama = LLM("MIDI_LLM/config.yaml")
+llama_tok = Llama_Tokenizer("MIDI_LLM/config.yaml")
+
+midi_dataset = MIDI_Dataset("MIDI_LLM/OriginalMidiFiles/bach/cellosui/", tokenization_method='TSD')
 
 for track in tqdm(midi_dataset, desc="Tracks", position=0):
     if len(track) <= 1025:
@@ -34,6 +37,8 @@ for track in tqdm(midi_dataset, desc="Tracks", position=0):
     '''
     correct = 0
     total = 0
+
+    generated_tokens = track[0: CONTEXT_LEN]
 
     inner_bar = tqdm(range(0, len(track) - 1025), desc=f"Single Track", position=1, leave=True)
     for idx in inner_bar:
@@ -49,9 +54,18 @@ for track in tqdm(midi_dataset, desc="Tracks", position=0):
         out, tokens = llama.infer(pseudo_english)
         token_out = tokens[0]
 
+        generated_tokens.append(token_out.id)
+
         if token_out.id == true_next_token:
             #logger.debug(f"Llama returned next tokens: {tokens}, true next token is {true_next_token}")
             correct += 1
         total += 1
         #logger.info(f"Current Accuracy: {correct / total}")
         inner_bar.set_postfix_str(f"Acc: {correct/total:.4f}")
+
+    midi_dataset.__setitem__(generated_tokens)
+
+# Generates midi files from tokens
+midi_dataset.generate_midi_files()
+
+print(midi_dataset)
