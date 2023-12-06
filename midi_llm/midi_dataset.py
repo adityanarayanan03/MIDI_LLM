@@ -10,6 +10,7 @@ logging.basicConfig()
 logger = logging.getLogger("midi_dataset")
 logger.setLevel(logging.DEBUG)
 
+token_mapping = 4000
 
 class MIDI_Dataset:
     def __init__(self, parent_dir, tokenization_method, verbose=0):
@@ -50,7 +51,7 @@ class MIDI_Dataset:
         '''
         logger.debug("Applying token mapping")
         for idx in range(len(self.tracks)):
-            self.tracks[idx] = [x + 10000 for x in self.tracks[idx]]
+            self.tracks[idx] = [x + token_mapping for x in self.tracks[idx]]
 
     def _reverse_token_mapping(self):
         '''
@@ -61,10 +62,10 @@ class MIDI_Dataset:
         logger.debug("Reversing token mapping")
         for idx in range(len(self.generated_track_tokens)):
             for index, x in enumerate(self.generated_track_tokens[idx]):
-                if x < 10000 or x - 10000 > self.max_tokens:
+                if x < token_mapping or x - token_mapping > self.max_tokens:
                     self.generated_track_tokens[idx][index] = 0
                 else:
-                    self.generated_track_tokens[idx][index] = x - 10000
+                    self.generated_track_tokens[idx][index] = x - token_mapping
 
     def _tokenize_files(self):
         '''
@@ -76,14 +77,14 @@ class MIDI_Dataset:
         '''
         tracks = []
 
-        config = TokenizerConfig()
+        config = TokenizerConfig(special_tokens=[])
 
         # Defining tokenizer dictionary for selection
         tokenizer_dict = {
             'Structured': Structured(config),
-            'TSD': TSD(config),
-            'MIDILike': MIDILike(config)
-            # 'REMI': REMI(config),
+            'TSD': TSD(TokenizerConfig(use_rests=True, use_tempos=True, use_pitch_bends=True, use_time_signatures=True)),
+            'MIDILike': MIDILike(config),
+            'REMI': REMI(TokenizerConfig(use_rests=True, use_tempos=True, use_pitch_bends=True, use_time_signatures=True))
             # 'MuMIDI': MuMIDI(config)
         }
 
@@ -117,6 +118,11 @@ class MIDI_Dataset:
         '''
         ts = TokSequence()
         ts.ids = token_ids
+        for id in ts.ids:
+            if isinstance(id, int):
+                continue
+            else:
+                print(id)
 
         self.tokenizer.complete_sequence(ts)
 
